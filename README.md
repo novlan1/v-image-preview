@@ -27,6 +27,3 @@ vue.use(VImagePreview, {
 ```html
 <img  v-preview src="https://mock.jpg"/>
 ```
-
-### TODO
-1. 手指放大缩小

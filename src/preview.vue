@@ -1,7 +1,7 @@
 <template>
   <div
     ref="imgViewWrap"
-    class="image-view-wrap"
+    class="v-image-preview-wrap"
     @click="onClose"
     :style="{...wrapStyle}"
   >
@@ -18,10 +18,13 @@
 </template>
 <script>
 
-const DEFAULT_ANIMA_DURATION = 300;
-const DEFAULT_MAX_WAIT_TIME = 1000;
-const DEFAULT_IMG_MAX_WIDTH = 0;
-const DEFAULT_MASK_BACKGROUND = 'rgba(18, 18, 18, 0.65)';
+
+import {
+  DEFAULT_ANIMA_DURATION,
+  DEFAULT_MAX_WAIT_TIME,
+  DEFAULT_IMG_MAX_WIDTH,
+  DEFAULT_MASK_BACKGROUND
+} from './config'
 
 export default {
   props: {
@@ -76,12 +79,12 @@ export default {
   },
   computed: {
     animaDurationSec() {
-      return Math.round(this.animaDuration / 1000)
+      return (this.animaDuration / 1000).toFixed(2)
     },
     wrapStyle() {
       return {
-        '-webkit-transition': `background-color ${this.animaDurationSec} ease-in-out`,
-        transition: `background-color ${this.animaDurationSec} ease-in-out`,
+        '-webkit-transition': `background-color ${this.animaDurationSec}s ease-in-out`,
+        transition: `background-color ${this.animaDurationSec}s ease-in-out`,
       }
     }
   },
@@ -100,18 +103,19 @@ export default {
       document.body.appendChild(newElement);
     },
     setWrapActiveStyle() {
-     this.insertCSS(`.image-view-wrap.is-active{ background-color: ${this.maskBackground}; }`)
+      this.insertCSS(`.v-image-preview-wrap.is-active{ background-color: ${this.maskBackground}; }`)
     },
     getOriginTransform() {
       const { animaDurationSec } = this;
       const imageClientRect = this.target.getClientRects()[0];
-      const { naturalWidth, naturalHeight, width, height, left, top } = this.target;
+      const { naturalWidth, naturalHeight } = this.target;
+      const { width, height, left, top } = imageClientRect;
       
       // 原始比例
       const originRatio = naturalWidth / naturalHeight;
 
       // 基准宽度
-      const baseWidth = getMinWidth(690, naturalWidth)
+      const baseWidth = this.getMinWidth(690, naturalWidth)
       // x轴恢复比例
       const originScaleX = width / baseWidth;
 
@@ -125,8 +129,8 @@ export default {
 
       this.imageStyle = {
         ...this.imageStyle,
-        transition: `transform ${animaDurationSec} ease-in-out, -webkit-transform ${animaDurationSec} ease-in-out`,
-        '-webkit-transition': `-webkit-transform ${animaDurationSec} ease-in-out`,
+        transition: `transform ${animaDurationSec}s ease-in-out`, 
+        '-webkit-transition': `-webkit-transform ${animaDurationSec}s ease-in-out`,
         width: `${baseWidth}px`,
         transform: originTransform,
 
@@ -138,7 +142,7 @@ export default {
       this.realSrc = this.src.split('?')[0];
     },
     getMinWidth(...args){
-      let res = Math.min(args);
+      let res = Math.min(...args);
 
       if (this.imgMaxWidth !== 0) {
         res = Math.min(res, this.imgMaxWidth);
@@ -179,7 +183,7 @@ export default {
       const documentoffsetWidth = document.documentElement.offsetWidth;
       const documentoffsetHeight = document.documentElement.offsetHeight;
       // 图片最后宽度
-      let afterWidth = getMinWidth(documentoffsetWidth - 20, naturalWidth / 2);
+      let afterWidth = this.getMinWidth(documentoffsetWidth - 20, naturalWidth);
 
       if (afterWidth < minImgWidth) {
         afterWidth = minImgWidth;
@@ -226,8 +230,7 @@ export default {
 };
 </script>
 <style scoped lang='scss'>
-
-.image-view-wrap {
+.v-image-preview-wrap {
   position: fixed;
   top: 0;
   right: 0;

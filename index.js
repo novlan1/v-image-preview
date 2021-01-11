@@ -1,5 +1,12 @@
 import Vue from 'vue';
 import ImageDialog from './src/preview.vue';
+import {
+  DEFAULT_ANIMA_DURATION,
+  DEFAULT_MAX_WAIT_TIME,
+  DEFAULT_IMG_MAX_WIDTH,
+  DEFAULT_MASK_BACKGROUND
+} from './src/config'
+
 
 let instance;
 let userOptions = {};
@@ -22,24 +29,11 @@ function initInstance(options) {
   // 先appendChild，再用new创建实例
   document.body.appendChild(dialogDiv);
 
-  const { 
-    src, 
-    target, 
-    maskBackground,
-    animaDuration,
-    imgMaxWidth,
-    maxWaitTime
-  } = options;
-
   instance = new (Vue.extend(ImageDialog))({
     el: dialogDiv,
     propsData: {
-      src, 
-      target, 
-      maskBackground,
-      animaDuration,
-      imgMaxWidth,
-      maxWaitTime
+      ...Dialog.defaultOptions,
+      ...options,
     },
   });
 
@@ -62,7 +56,10 @@ function Dialog(options) {
 }
 
 Dialog.defaultOptions = {
-
+  maskBackground: DEFAULT_MASK_BACKGROUND,
+  animaDuration: DEFAULT_ANIMA_DURATION,
+  imgMaxWidth: DEFAULT_IMG_MAX_WIDTH,
+  maxWaitTime: DEFAULT_MAX_WAIT_TIME
 };
 
 function close() {
