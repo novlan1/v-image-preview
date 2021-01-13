@@ -15,7 +15,7 @@ npm install --save v-image-preview
 2. 引入并使用：
 ```js
 import VImagePreview from 'v-image-preview';
-vue.use(VImagePreview, {
+Vue.use(VImagePreview, {
   maskBackground: 'rgba(0, 0, 0, 0.65)', // 遮罩背景，rgba模式，默认`rgba(18, 18, 18, 0.65)`
   animaDuration: 300, // 动画持续时间，默认300，单位ms
   imgMaxWidth: 400, // 放大时图片最大宽度，单位px；设置为0，即不限制；默认0
@@ -25,5 +25,8 @@ vue.use(VImagePreview, {
 
 3. 在img标签上使用v-preview指令
 ```html
-<img  v-preview src="https://mock.jpg"/>
+<img 
+  v-preview 
+  src="https://mock.jpg"
+/>
 ```
