@@ -4,11 +4,30 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint --ext .js,.vue .",
+    "lint:fix": "eslint --fix --ext .js,.vue ."
   },
   "author": "mike",
   "license": "ISC",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix"
+    ],
+    "*.vue": [
+      "eslint --fix"
+    ]
+  },
   "devDependencies": {
+    "eslint": "^7.17.0",
+    "eslint-config-rookie": "0.0.2",
+    "eslint-plugin-vue": "^7.4.1",
+    "husky": "^4.3.7",
+    "lint-staged": "^10.5.3",
     "postcss": "^8.2.3"
   },
   "dependencies": {}

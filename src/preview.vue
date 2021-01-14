@@ -2,13 +2,20 @@
   <div
     ref="imgViewWrap"
     class="v-image-preview-wrap"
-    @click="onClose"
     :style="{...wrapStyle}"
+    @click="onClose"
   >
-    <div class="v-loading-wrap" v-show="loading">
-     <v-loading />
+    <div
+      v-show="loading"
+      class="v-loading-wrap"
+    >
+      <v-loading />
     </div>
-    <div class="image-view-inner" v-show="!loading" ref="imgViewInner">
+    <div
+      v-show="!loading"
+      ref="imgViewInner"
+      class="image-view-inner"
+    >
       <img
         ref="image"
         :key="realSrc"
@@ -25,12 +32,12 @@ import {
   DEFAULT_ANIMA_DURATION,
   DEFAULT_MAX_WAIT_TIME,
   DEFAULT_IMG_MAX_WIDTH,
-  DEFAULT_MASK_BACKGROUND
-} from './config'
+  DEFAULT_MASK_BACKGROUND,
+} from './config';
 
 export default {
   components: {
-    VLoading
+    VLoading,
   },
   props: {
     src: {
@@ -82,12 +89,12 @@ export default {
       imageStyle: {
         transformOrigin: '0 0',
       },
-      wrapStyle: {}
+      wrapStyle: {},
     };
   },
   computed: {
     animaDurationSec() {
-      return (this.animaDuration / 1000).toFixed(2)
+      return (this.animaDuration / 1000).toFixed(2);
     },
   },
   beforeMount() {
@@ -103,19 +110,19 @@ export default {
   },
   methods: {
     insertCSS(newStyle) {
-      const newElement = document.createElement("style");
+      const newElement = document.createElement('style');
       newElement.innerHTML = newStyle;
       document.body.appendChild(newElement);
     },
     // 设置wrap样式，如果懒加载图片，没有背景色动画，如果不是懒加载的图片，有背景色动画
     setWrapStyle() {
       this.wrapStyle = {
-         '-webkit-transition': `background-color ${this.animaDurationSec}s ease-in-out`,
+        '-webkit-transition': `background-color ${this.animaDurationSec}s ease-in-out`,
         transition: `background-color ${this.animaDurationSec}s ease-in-out`,
-      }
+      };
       this.$nextTick(() => {
-        this.wrapStyle.background = this.maskBackground
-      })
+        this.wrapStyle.background = this.maskBackground;
+      });
     },
     // 获取恢复的transform信息
     getOriginTransform() {
@@ -123,7 +130,7 @@ export default {
 
       this.imageStyle = {
         ...this.imageStyle,
-        transition: `transform ${animaDurationSec}s ease-in-out`, 
+        transition: `transform ${animaDurationSec}s ease-in-out`,
         '-webkit-transition': `-webkit-transform ${animaDurationSec}s ease-in-out`,
       };
 
@@ -133,10 +140,10 @@ export default {
       this.minImgWidth = width;
 
       this.realSrc = this.src && this.src.split('?')[0];
-      this.isLazyImg = this.realSrc !== this.src
+      this.isLazyImg = this.realSrc !== this.src;
     },
     // 获取图片最小宽度，如果用户设置了最小宽度，要用它再比较一次
-    getMinWidth(...args){
+    getMinWidth(...args) {
       let res = Math.min(...args);
 
       if (this.imgMaxWidth !== 0) {
@@ -155,7 +162,7 @@ export default {
       const originRatio = naturalWidth / naturalHeight;
 
       // 基准宽度
-      const baseWidth = this.getMinWidth(690, naturalWidth)
+      const baseWidth = this.getMinWidth(690, naturalWidth);
       // x轴恢复比例
       const originScaleX = width / baseWidth;
 
@@ -178,8 +185,8 @@ export default {
 
       return {
         originRatio,
-        width
-      }
+        width,
+      };
     },
     // 加载原始图片
     loadImage() {
@@ -214,7 +221,7 @@ export default {
       if (afterWidth < minImgWidth) {
         afterWidth = minImgWidth;
       }
-      
+
       // 图片最后高度
       const afterHeight = afterWidth / originRatio;
 
@@ -232,21 +239,19 @@ export default {
       document.body.style = 'overflow: hidden';
       const transform = `translate3d(${afterTranslateX}px, ${afterTranslateY}px, 0px) scale3d(${afterScale}, ${afterScale}, 1)`;
 
-      this.$nextTick(() => { 
+      this.$nextTick(() => {
         this.imageStyle = {
           ...this.imageStyle,
           transform,
         };
-      })
+      });
     },
     // 若关闭弹窗时向下滑动了一段距离，将其加到transform上
     onJudgeCloseScollTop() {
       if (this.$refs.imgViewInner) {
         const { scrollTop } = this.$refs.imgViewInner;
         if (scrollTop) {
-          this.originTransform = this.originTransform.replace(/(.*?),\s?(.*?)px(.*)/, (s, s1,s2,s3) => {
-            return `${s1},${parseInt(s2)+scrollTop}px${s3}`
-          })
+          this.originTransform = this.originTransform.replace(/(.*?),\s?(.*?)px(.*)/, (s, s1, s2, s3) => `${s1},${parseInt(s2) + scrollTop}px${s3}`);
         }
       }
     },
@@ -255,10 +260,10 @@ export default {
       // 若加载图片中就再次点击，直接emit(close)
       if (this.loading) {
         this.$emit('close');
-        return 
+        return;
       }
 
-      this.wrapStyle.background = 'none'
+      this.wrapStyle.background = 'none';
       this.onJudgeCloseScollTop();
 
       this.imageStyle = {

@@ -4,8 +4,8 @@ import {
   DEFAULT_ANIMA_DURATION,
   DEFAULT_MAX_WAIT_TIME,
   DEFAULT_IMG_MAX_WIDTH,
-  DEFAULT_MASK_BACKGROUND
-} from './src/config'
+  DEFAULT_MASK_BACKGROUND,
+} from './src/config';
 
 
 let instance;
@@ -16,7 +16,6 @@ function isInDocument(element) {
 }
 
 function initInstance(options) {
-
   if (!options.src) {
     return;
   }
@@ -59,7 +58,7 @@ Dialog.defaultOptions = {
   maskBackground: DEFAULT_MASK_BACKGROUND,
   animaDuration: DEFAULT_ANIMA_DURATION,
   imgMaxWidth: DEFAULT_IMG_MAX_WIDTH,
-  maxWaitTime: DEFAULT_MAX_WAIT_TIME
+  maxWaitTime: DEFAULT_MAX_WAIT_TIME,
 };
 
 function close() {
@@ -107,7 +106,7 @@ const test = {
         ...userOptions,
       });
     });
-  }, 
+  },
 };
 
 Dialog.install = (Vue, options) => {
@@ -118,3 +117,4 @@ Dialog.install = (Vue, options) => {
 Dialog.Component = ImageDialog;
 
 export default Dialog;
+

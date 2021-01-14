@@ -1,14 +1,17 @@
 <template>
   <div class="v-loading-spiner-wrap">
     <span class="v-loading-spiner-inner">
-      <i v-for="(item, index) in new Array(12)" :key="index" />
+      <i
+        v-for="(item, index) in new Array(12)"
+        :key="index"
+      />
     </span>
   </div>
 </template>
 <script>
 export default {
-  
-}
+
+};
 </script>
 <style scoped lang="scss">
 $gray-5: #c8c9cc;
