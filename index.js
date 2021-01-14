@@ -84,21 +84,21 @@ Dialog.resetDefaultOptions();
 
 
 const test = {
-  componentUpdated(el) {
-    const image = new Image();
-    let { src } = el;
+  // componentUpdated(el) {
+  //   const image = new Image();
+  //   let { src } = el;
 
-    if (el.dataset && el.dataset.src) {
-      src = el.dataset.src;
-    }
+  //   if (el.dataset && el.dataset.src) {
+  //     src = el.dataset.src;
+  //   }
 
-    if (src) {
-      setTimeout(() => {
-        // 加载原始大小图片
-        image.src = src.split('?')[0];
-      }, 100);
-    }
-  },
+  //   if (src) {
+  //     setTimeout(() => {
+  //       // 加载原始大小图片
+  //       image.src = src.split('?')[0];
+  //     }, 100);
+  //   }
+  // },
   bind(el) {
     el.addEventListener('click', () => {
       Dialog({

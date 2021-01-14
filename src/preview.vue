@@ -5,9 +5,11 @@
     @click="onClose"
     :style="{...wrapStyle}"
   >
-    <div class="image-view-inner">
+    <div class="v-loading-wrap" v-show="loading">
+     <v-loading />
+    </div>
+    <div class="image-view-inner" v-show="!loading" ref="imgViewInner">
       <img
-        v-if="loadedImg"
         ref="image"
         :key="realSrc"
         :src="realSrc"
@@ -18,7 +20,7 @@
 </template>
 <script>
 
-
+import VLoading from './loading-spinner';
 import {
   DEFAULT_ANIMA_DURATION,
   DEFAULT_MAX_WAIT_TIME,
@@ -27,6 +29,9 @@ import {
 } from './config'
 
 export default {
+  components: {
+    VLoading
+  },
   props: {
     src: {
       type: String,
@@ -68,33 +73,33 @@ export default {
       originTransform: '',
       baseWidth: '',
       minImgWidth: '',
+      naturalWidth: '', // 原始图片的真实宽度
 
       // 衍生信息
-      loadedImg: false,
+      loading: false, // 是否正在加载
+      isLazyImg: false,
       realSrc: '',
       imageStyle: {
         transformOrigin: '0 0',
       },
+      wrapStyle: {}
     };
   },
   computed: {
     animaDurationSec() {
       return (this.animaDuration / 1000).toFixed(2)
     },
-    wrapStyle() {
-      return {
-        '-webkit-transition': `background-color ${this.animaDurationSec}s ease-in-out`,
-        transition: `background-color ${this.animaDurationSec}s ease-in-out`,
-      }
-    }
   },
   beforeMount() {
     this.getOriginTransform();
-    this.setWrapActiveStyle();
+    this.setWrapStyle();
   },
   async mounted() {
-    await this.loadImage();
-    this.getAnimation();
+    if (this.isLazyImg) {
+      this.loading = true;
+      await this.loadImage();
+    }
+    this.getTransform();
   },
   methods: {
     insertCSS(newStyle) {
@@ -102,15 +107,50 @@ export default {
       newElement.innerHTML = newStyle;
       document.body.appendChild(newElement);
     },
-    setWrapActiveStyle() {
-      this.insertCSS(`.v-image-preview-wrap.is-active{ background-color: ${this.maskBackground}; }`)
+    // 设置wrap样式，如果懒加载图片，没有背景色动画，如果不是懒加载的图片，有背景色动画
+    setWrapStyle() {
+      this.wrapStyle = {
+         '-webkit-transition': `background-color ${this.animaDurationSec}s ease-in-out`,
+        transition: `background-color ${this.animaDurationSec}s ease-in-out`,
+      }
+      this.$nextTick(() => {
+        this.wrapStyle.background = this.maskBackground
+      })
     },
+    // 获取恢复的transform信息
     getOriginTransform() {
       const { animaDurationSec } = this;
+
+      this.imageStyle = {
+        ...this.imageStyle,
+        transition: `transform ${animaDurationSec}s ease-in-out`, 
+        '-webkit-transition': `-webkit-transform ${animaDurationSec}s ease-in-out`,
+      };
+
+      const { width, originRatio } = this.onResetBaseWidth(this.target);
+
+      this.originRatio = originRatio;
+      this.minImgWidth = width;
+
+      this.realSrc = this.src && this.src.split('?')[0];
+      this.isLazyImg = this.realSrc !== this.src
+    },
+    // 获取图片最小宽度，如果用户设置了最小宽度，要用它再比较一次
+    getMinWidth(...args){
+      let res = Math.min(...args);
+
+      if (this.imgMaxWidth !== 0) {
+        res = Math.min(res, this.imgMaxWidth);
+      }
+
+      return res;
+    },
+    // 获取缩小用的transform信息
+    onResetBaseWidth(target) {
+      const { naturalWidth, naturalHeight } = target;
       const imageClientRect = this.target.getClientRects()[0];
-      const { naturalWidth, naturalHeight } = this.target;
       const { width, height, left, top } = imageClientRect;
-      
+
       // 原始比例
       const originRatio = naturalWidth / naturalHeight;
 
@@ -129,56 +169,42 @@ export default {
 
       this.imageStyle = {
         ...this.imageStyle,
-        transition: `transform ${animaDurationSec}s ease-in-out`, 
-        '-webkit-transition': `-webkit-transform ${animaDurationSec}s ease-in-out`,
         width: `${baseWidth}px`,
         transform: originTransform,
-
       };
-      this.minImgWidth = width;
-      this.originRatio = originRatio;
-      this.baseWidth = baseWidth;
       this.originTransform = originTransform;
-      this.realSrc = this.src.split('?')[0];
-    },
-    getMinWidth(...args){
-      let res = Math.min(...args);
+      this.baseWidth = baseWidth;
+      this.naturalWidth = naturalWidth;
 
-      if (this.imgMaxWidth !== 0) {
-        res = Math.min(res, this.imgMaxWidth);
+      return {
+        originRatio,
+        width
       }
-
-      return res;
     },
-    getAnimation() {
-      this.imgViewRef = this.$refs.imgViewWrap;
-      this.$nextTick(() => {
-        this.imgViewRef.classList.add('is-active');
-        this.getTransform();
-      });
-    },
+    // 加载原始图片
     loadImage() {
       return new Promise((resolve) => {
-        const image = new Image();
+        const image = document.createElement('img');
         image.src = this.realSrc;
 
         image.onload = () => {
+          this.loading = false;
+          this.onResetBaseWidth(image);
           resolve();
-          this.loadedImg = true;
         };
 
         setTimeout(() => {
-          if (!this.loadedImg) {
+          if (this.loading) {
             this.realSrc = this.src;
-            this.loadedImg = true;
+            this.loading = false;
           }
           resolve();
         }, this.maxWaitTime);
       });
     },
+    // 获取放大用的transform
     getTransform() {
-      const { baseWidth, originRatio, minImgWidth } = this;
-      const { naturalWidth } = this.$refs.image;
+      const { baseWidth, originRatio, minImgWidth, naturalWidth } = this;
 
       const documentoffsetWidth = document.documentElement.offsetWidth;
       const documentoffsetHeight = document.documentElement.offsetHeight;
@@ -206,21 +232,40 @@ export default {
       document.body.style = 'overflow: hidden';
       const transform = `translate3d(${afterTranslateX}px, ${afterTranslateY}px, 0px) scale3d(${afterScale}, ${afterScale}, 1)`;
 
-      setTimeout(() => {
+      this.$nextTick(() => { 
         this.imageStyle = {
           ...this.imageStyle,
           transform,
         };
-      }, 0);
+      })
     },
-    onClose() {
-      if (this.imgViewRef && this.imgViewRef.classList) {
-        this.imgViewRef.classList.remove('is-active');
+    // 若关闭弹窗时向下滑动了一段距离，将其加到transform上
+    onJudgeCloseScollTop() {
+      if (this.$refs.imgViewInner) {
+        const { scrollTop } = this.$refs.imgViewInner;
+        if (scrollTop) {
+          this.originTransform = this.originTransform.replace(/(.*?),\s?(.*?)px(.*)/, (s, s1,s2,s3) => {
+            return `${s1},${parseInt(s2)+scrollTop}px${s3}`
+          })
+        }
       }
+    },
+    // 关闭弹窗
+    onClose() {
+      // 若加载图片中就再次点击，直接emit(close)
+      if (this.loading) {
+        this.$emit('close');
+        return 
+      }
+
+      this.wrapStyle.background = 'none'
+      this.onJudgeCloseScollTop();
+
       this.imageStyle = {
         ...this.imageStyle,
         transform: this.originTransform,
       };
+
       setTimeout(() => {
         document.body.style = '';
         this.$emit('close');
@@ -250,5 +295,15 @@ export default {
       cursor: zoom-out;
     }
   }
+}
+.v-image-preview-wrap .v-loading-wrap {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
