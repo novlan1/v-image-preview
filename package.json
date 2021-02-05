@@ -1,8 +1,8 @@
 {
   "name": "v-image-preview",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "",
-  "main": "index.js",
+  "main": "lib/v-image-preview.common.js",
   "scripts": {
     "lint": "eslint --ext .js,.vue .",
     "lint:fix": "eslint --fix --ext .js,.vue .",
