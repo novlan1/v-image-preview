@@ -4,10 +4,16 @@
   </div>
 </template>
 <script>
-import VImagePreview from 'v-image-preview';
+// import VImagePreview from 'v-image-preview';
 import Vue from 'vue';
+import VImagePreview2 from '../../../lib/v-image-preview.common';
+import test from './test';
 
-Vue.use(VImagePreview);
+console.log('ttt', test)
+console.log(VImagePreview2)
+Vue.use(VImagePreview2);
+
+// Vue.use(VImagePreview);
 
 export default {
   

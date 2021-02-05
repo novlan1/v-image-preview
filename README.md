@@ -30,3 +30,9 @@ Vue.use(VImagePreview, {
   src="https://mock.jpg"
 />
 ```
+
+### 更新日志
+
+v0.0.7 
+- webpack打包，压缩文件、并解决低版本不适配问题
+

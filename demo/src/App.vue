@@ -6,7 +6,6 @@
 
 <script>
 import TestImagePreview from './components/test-image-preview';
-
 export default {
   name: 'App',
   components: {
