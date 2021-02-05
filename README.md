@@ -33,6 +33,8 @@ Vue.use(VImagePreview, {
 
 ### 更新日志
 
-v0.0.7 
+#### v0.0.7 
 - webpack打包，压缩文件、并解决低版本不适配问题
 
+#### v0.0.8
+- 修改`package.json`中的`main`字段
